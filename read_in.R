@@ -19,7 +19,8 @@ read_in <- function(input_file) {
     # read in word document
     t <- readtext::readtext(input_file) %>%
       as.data.frame() %>%
-      mutate(text = as.character(text))
+      mutate(text = as.character(text)) %>%
+      select(-doc_id)
     
     return(t)
     
@@ -30,6 +31,9 @@ read_in <- function(input_file) {
       as.data.frame() %>%
       mutate(text = as.character(`.`)) %>%
       select(-`.`)
+    
+    # note: this includes the tags of the text 
+    # BUT further analysis seems to ignore these
     
     return(t)
     

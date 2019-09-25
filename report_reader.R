@@ -18,13 +18,18 @@ library(cleanNLP) # clean named word entities
 library(pdftools) # read pdfs
 
 # source functions
-source("~/read_in.R")
+source("~/R/Projects/ce_2019/read_in.R")
+# may want to use the 'here' package for this 
 
 # input_file 
 input_file <- "C:/Users/Amy/Documents/ce_report_example.docx"
+pdf_file <- "C:/Users/Amy/Documents/ce_report_example.pdf"
 
 # read in the report 
 report <- read_in(input_file = input_file)
+report <- read_in(input_file = pdf_file)
+
+report_pdf <- pdf_(pdf_file)
 
 # may or may not work 
 styles_info(report)
@@ -91,10 +96,8 @@ return(p)
 
 }
 
-word_frequencies(section_text, "first_section_text")
-
-?Annotation(report$text)
-class(report$text)
+# this should generate a plot of the frequency of words
+word_frequencies(section_text, "section_text")
 
 # what are the most common entity types used in the addresses?
 cnlp_get_entity(report$first_section_text)$entity_type %>%
