@@ -14,13 +14,24 @@ library(data.table) # for using quick things
 library(ggplot2) # for graphing
 library(plotly) # for interactive graphing
 library(tidytext) # for word frequencies
+library(cleanNLP) # clean named word entities
+library(pdftools) # read pdfs
 
-# read in word document as one long string
-report <- readtext::readtext("C:/Users/Amy/Documents/ce_report_example.docx")
-# any checks that the read-in document should have?
+# source functions
+source("~/R/Projects/ce_2019/read_in.R")
+# may want to use the 'here' package for this 
 
-report <- as.data.frame(report) %>%
-  mutate(text = as.character(text))
+# input_file 
+input_file <- "C:/Users/Amy/Documents/ce_report_example.docx"
+pdf_file <- "C:/Users/Amy/Documents/ce_report_example.pdf"
+
+# read in the report 
+report <- read_in(input_file = input_file)
+report <- read_in(input_file = pdf_file)
+
+report_pdf <- pdf_(pdf_file)
+
+# may or may not work 
 styles_info(report)
 
 # # this will read in the report with line breaks and so multiple string records
@@ -48,13 +59,16 @@ location_second_section <- grep("this is a new heading", report$text)[1]
 # The text in between these 2 sections will be the text we want
 section_text <- paste(report$text[(location_first_section+1):(location_second_section-1)], collapse=" ")
 
-first_section <- data.frame(first_section_text) %>%
-  mutate(first_section_text = as.character(first_section_text))
+section_text <- data.frame(section_text) %>%
+  mutate(section_text = as.character(section_text))
 
 
 # create function to split the words of the section and plot them
 
 word_frequencies <- function(section_df, text_var) {
+  
+  expect_s3_class(section_df, "data.frame")
+  expect_type(text_var, "character")
   
 section_df <- section_df %>%
   rowid_to_column()
@@ -73,7 +87,7 @@ p <- ggplotly(
   word_counts %>%
     ggplot(aes(reorder(word, n), n, fill = as.factor(word))) +
     geom_col(show.legend = FALSE) +
-    theme(legend.position = "none", axis.title.y = element_blank()) 
+    theme(legend.position = "none", axis.title.y = element_blank()) +
     ggtitle("Count of most frequent words in section") +
   coord_flip()
 )
@@ -82,5 +96,17 @@ return(p)
 
 }
 
-word_frequencies(first_section, "first_section_text")
+# this should generate a plot of the frequency of words
+word_frequencies(section_text, "section_text")
 
+# what are the most common entity types used in the addresses?
+cnlp_get_entity(report$first_section_text)$entity_type %>%
+  table()
+
+# what are the most common locations mentioned?
+res <- cnlp_get_entity(report) %>%
+  filter(entity_type == "LOCATION")
+res$entity %>%
+  table() %>%
+  sort(decreasing = TRUE) %>%
+  head(n = 25)
