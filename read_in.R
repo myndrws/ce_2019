@@ -1,4 +1,9 @@
-# function to read in either pdf or word documents
+#--------------------------------------------------------------------#
+# Program purpose: function to read in either pdf or word documents  #
+# Author: Amy Andrews                                                #
+# Date: OCT2019                                                      #
+#--------------------------------------------------------------------#
+
 
 # this still needs to get the word and pdf document into the same format at the end
 

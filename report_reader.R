@@ -1,9 +1,25 @@
-# Reading text from templated word docs into an R data frame
-# Amy Andrews
-# 12/08/2019
+#-----------------------------------------------------------------------------#
+# Program purpose: Reading text from templated word docs into an R data frame #
+# Author: Amy Andrews                                                         #
+# Date: SEP2019                                                               #
+#-----------------------------------------------------------------------------#
+
+# install packages
+install.packages("textreadr") # for reading in word documents and preserving formatting
+install.packages("readtext") # for doing the same thing (?")
+install.packages("tm") # for manipulating text and getting named terms
+install.packages("tidyverse") # for general data manipulation 
+install.packages("testthat") # for checking the code along the way
+install.packages("officer") # for reading the styles of the documents
+install.packages("data.table") # for using quick things
+install.packages("ggplot2") # for graphing
+install.packages("plotly") # for interactive graphing
+install.packages("tidytext") # for word frequencies
+install.packages("cleanNLP") # clean named word entities
+install.packages("pdftools") # read pdfs
+
 
 # load libraries
-
 library(textreadr) # for reading in word documents and preserving formatting
 library(readtext) # for doing the same thing (?)
 library(tm) # for manipulating text and getting named terms
@@ -18,7 +34,11 @@ library(cleanNLP) # clean named word entities
 library(pdftools) # read pdfs
 
 # source functions
-source("~/R/Projects/ce_2019/read_in.R")
+if(getwd()=="/cloud/project"){
+  source("/cloud/project/read_in.R")
+}else{
+  source("~/R/Projects/ce_2019/read_in.R")}
+
 # may want to use the 'here' package for this 
 
 # input_file 
