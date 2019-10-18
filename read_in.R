@@ -8,7 +8,6 @@
 # this still needs to get the word and pdf document into the same format at the end
 
 require(testthat)
-require(tidyverse)
 require(pdftools)
 require(readtext)
 
