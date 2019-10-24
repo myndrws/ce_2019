@@ -3,13 +3,11 @@
 # Author: Amy Andrews                                                #
 # Date: OCT2019                                                      #
 #--------------------------------------------------------------------#
-
-
 # this still needs to get the word and pdf document into the same format at the end
 
-require(testthat)
-require(pdftools)
-require(readtext)
+library(testthat)
+library(pdftools)
+library(readtext)
 
 read_in <- function(input_file) {
   
