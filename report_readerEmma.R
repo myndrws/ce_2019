@@ -20,7 +20,7 @@ library(tokenizers) #splits test into sentences - tokens
 
 # set working directory -----------------------------------------------------------
 if(getwd()=="/cloud/project"){
-  setwd("/cloud/project/read_in.R")
+  setwd("/cloud/project/")
 }else{
   setwd("C:/Users/OldfieldE/OneDrive - Department for Business Energy and Industrial Strategy/Cool Earth/R code")}
 
@@ -28,25 +28,66 @@ if(getwd()=="/cloud/project"){
 # source functions ----------------------------------------------------------------
 source("read_in.R")
 
+
+#----------------------------------------------------------------------------------#
+# Things to update in script                                                       #
+#----------------------------------------------------------------------------------#
+# File path to reports
+# File path to SDGs
+# Working directory
+
+
 #----------------------------------------------------------------------------------#
 # Step 1 - Bring in the report(s)                                                  #
 #----------------------------------------------------------------------------------#
 
-# input_file 
-input_file_pdf <- "/cloud/project/ADAS-Research-to-update-the-evidence-base-for-indicators-of-climate-related-risks-and-actions-in-England.pdf"
+# # input_file 
+# input_file_pdf <- "/cloud/project/Reports/ADAS-Research-to-update-the-evidence-base-for-indicators-of-climate-related-risks-and-actions-in-England.pdf"
+# 
+# # read in the report using read_in function created
+# report <- read_in(input_file = input_file_pdf)
 
-# read in the report using read_in function created
-report <- read_in(input_file = input_file_pdf)
+
+# Read in a list of files names in the report folder
+files_list <- data.frame(list.files(path = paste0(getwd(), "/Reports"), full.names = TRUE))
+
+
+# create a single dataframe with each row representing each document
+reports_all <- purrr::map_dfr(as.character(files_list[,1]), read_in, .id = "report_id") 
+
+# .id creates a unique id for every iteration of the purrr i.e. a unique id for each report
+  #rowid_to_column() %>%
+  #mutate(text = gsub("\r", ".", text))
+
+
 
 #----------------------------------------------------------------------------------#
 # Step 2 - Split into sentences                                                    #
 #----------------------------------------------------------------------------------#
 
-# create one string
-report_string <- paste(report[,1])
+# iterate through each report - linking all strings in a file into one big string
+for(i in 1:max(reports_all$report_id)){
+  
+  # select one report at a time
+  report_selected <- reports_all %>% filter(report_id == i )
+  
+  # create one string
+  report_string <- paste(report_selected[,"text"])
+  
+  # split into sentences
+  report_tokenized <- unlist(tokenize_sentences(report_string))
+  
+  # create data frame with sentence as each row and sentence Id
+  report_analysis <- as.data.frame(report_tokenized) %>%
+    mutate(sentence_id = row_number(), report_id = i) 
+  
+  if(exists("report_tokenized_all")){
+    report_tokenized_all <- rbind(report_analysis, report_tokenized_all)
+  }else{
+    report_tokenized_all <- report_analysis
+  }
+}
 
-# split into sentences
-report_tokenized <- unlist(tokenize_sentences(report_string))
 
 # remove nouns?
 
@@ -71,9 +112,9 @@ create_vector_words <- function(SDG_id){
 
 # call function to create 17 vectors of SDG words
 for(i in 1:17){
-  name_of_vector <- paste0("wordsOfInterest_SDG", i)
+  name_of_vector <- paste0("wordsOfInterest_SDG", i) # create name of vector to change with SDG number
   assign(name_of_vector, create_vector_words(i)) 
-}
+  }
 
 
 #----------------------------------------------------------------------------------#
@@ -137,9 +178,7 @@ for(i in 1:17){
 #              #  "word02 word07 word08 word09",
 #              #  ...)
 
-# create data frame with sentence as each row and sentence Id
-report_anaysis <- as.data.frame(report_tokenized) %>%
-  mutate(sentence_id = row_number())
+
 
 # Use words of interest defined in section 3 to count occurance in each sentence (e.g. wordsOfInterest_SDG1)
 
@@ -152,60 +191,60 @@ report_anaysis <- as.data.frame(report_tokenized) %>%
 
 
 # finds yes or no occurance not count of occurances
-report_anaysis$keywordtag_SDG1 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG1, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG2 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG2, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG3 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG3, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG4 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG4, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG5 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG5, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG6 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG6, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG7 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG7, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG8 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG8, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG9 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG9, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG10 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG10, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG11 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG11, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG12 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG12, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG13 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG13, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG14 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG14, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG15 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG15, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG16 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG16, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
-report_anaysis$keywordtag_SDG17 <- 
-  (1:nrow(report_anaysis) %in% c(sapply(wordsOfInterest_SDG17, grep, report_anaysis$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG1 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG1, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG2 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG2, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG3 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG3, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG4 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG4, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG5 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG5, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG6 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG6, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG7 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG7, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG8 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG8, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG9 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG9, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG10 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG10, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG11 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG11, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG12 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG12, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG13 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG13, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG14 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG14, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG15 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG15, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG16 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG16, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_tokenized_all$keywordtag_SDG17 <- 
+  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG17, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
 
 
 # Keep dataframe of all occurances and remove 0s
-occurance_SDG <- report_anaysis %>% filter(keywordtag_SDG1 != 0 |
-                                             keywordtag_SDG2 != 0 |
-                                             keywordtag_SDG3 != 0|
-                                             keywordtag_SDG4 != 0|
-                                             keywordtag_SDG5 != 0|
-                                             keywordtag_SDG6 != 0|
-                                             keywordtag_SDG7 != 0|
-                                             keywordtag_SDG8 != 0|
-                                             keywordtag_SDG9 != 0|
-                                             keywordtag_SDG10 != 0|
-                                             keywordtag_SDG11 != 0|
-                                             keywordtag_SDG12 != 0|
-                                             keywordtag_SDG13 != 0|
-                                             keywordtag_SDG14 != 0|
-                                             keywordtag_SDG15 != 0|
-                                             keywordtag_SDG16 != 0|
-                                             keywordtag_SDG17 != 0)
+occurance_SDG <- report_tokenized_all %>% filter(keywordtag_SDG1 != 0 |
+                                   keywordtag_SDG2 != 0 |
+                                   keywordtag_SDG3 != 0|
+                                     keywordtag_SDG4 != 0|
+                                     keywordtag_SDG5 != 0|
+                                     keywordtag_SDG6 != 0|
+                                     keywordtag_SDG7 != 0|
+                                     keywordtag_SDG8 != 0|
+                                     keywordtag_SDG9 != 0|
+                                     keywordtag_SDG10 != 0|
+                                     keywordtag_SDG11 != 0|
+                                     keywordtag_SDG12 != 0|
+                                     keywordtag_SDG13 != 0|
+                                     keywordtag_SDG14 != 0|
+                                     keywordtag_SDG15 != 0|
+                                     keywordtag_SDG16 != 0|
+                                     keywordtag_SDG17 != 0)
 #####################vis above logic correct
 
 
@@ -219,9 +258,9 @@ occurance_SDG <- report_anaysis %>% filter(keywordtag_SDG1 != 0 |
 # Step 4 - Method 2 - Use fasttext for word2vec analysis                           #
 #----------------------------------------------------------------------------------#
 
-install.packages("fastTextR")
+#install.packages("fastTextR")
 #install.packages("fastText")
-library(fastTextR)
+#library(fastTextR)
 #library(fastText)
 
 # save.fasttext(con, "dbpedia")
@@ -269,17 +308,17 @@ library(fastTextR)
 # It is uploaded using the bottom left panel in the R studio screen under files > upload.
 # (It can take a few minutes to upload) or running the code below
 
-con = url("https://dl.fbaipublicfiles.com/fasttext/supervised-models/dbpedia.bin", "r")
-con = gzcon(con)
-wv = readLines(con)
-
-# This line reads in the model. The model is used to predict whether a word/vector 
-# of words is related to a piece of text 
-
-model <- fasttext(input = wv, method = "supervised", control = cntrl)
-save.fasttext(wv, "dbpedia")
-
-model <- read.fasttext(wv)
+# con = url("https://dl.fbaipublicfiles.com/fasttext/supervised-models/dbpedia.bin", "r")
+# con = gzcon(con)
+# wv = readLines(con)
+# 
+# # This line reads in the model. The model is used to predict whether a word/vector 
+# # of words is related to a piece of text 
+# 
+# model <- fasttext(input = wv, method = "supervised", control = cntrl)
+# save.fasttext(wv, "dbpedia")
+# 
+# model <- read.fasttext(wv)
 
 # If this errors - 
 
@@ -332,3 +371,10 @@ model <- read.fasttext(wv)
 # distance(file_name = "vec.bin",
 #          search_word = "princess",
 #          num = 10)
+
+
+#----------------------------------------------------------------------------------#
+# Step 4 - Use rword2vec for word2vec analysis                                     #
+#----------------------------------------------------------------------------------#
+install.packages("fastrtext")
+library(fastrtext)
