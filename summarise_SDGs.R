@@ -10,6 +10,8 @@ library(tidytext) # for word frequencies
 library(topicmodels) # for topic modelling
 library(quanteda) # for tokenising
 library(data.table) # for writing to csv
+library(pdftools) # for some pdf manipulation 
+library(qdap) # for getting synonyms
 
 setwd("~/R/Projects/ce_2019") # for reading in 
 
@@ -29,15 +31,50 @@ files <- files %>%
 
 # create a single dataframe with each row representing each document
 sdgs <- purrr::map_dfr(as.character(files[,1]), read_in) %>%
+  rowid_to_column() 
+
+# get the other sdg pdf document
+sdg_report <- read_in("https://unstats.un.org/sdgs/report/2019/The-Sustainable-Development-Goals-Report-2019.pdf") %>%
   rowid_to_column() %>%
-  mutate(text = gsub("\r", ".", text))
+  filter(rowid > 23 & rowid < 60) # filter down to relevant page numbers
 
+# split according to pages 
+filter_bind <- function(range, sdg_number) {
+  
+  sdg <- sdg_report %>%
+    filter(rowid %in% range) %>%
+    select(text)
+  
+  concat <- paste(as.character(sdg$text), collapse = "")
+  
+  sdgs <<- sdgs %>%
+    mutate(text = ifelse(rowid == sdg_number, paste(text, concat, ""), text))
+  
+}
+
+filter_bind(24:25, 1)
+filter_bind(26:27, 2)
+filter_bind(28:31, 3)
+filter_bind(32:33, 4)
+filter_bind(34:35, 5)
+filter_bind(36:37, 6)
+filter_bind(38:39, 7)
+filter_bind(40:41, 8)
+filter_bind(42:43, 9)
+filter_bind(44:45, 10)
+filter_bind(46:47, 11)
+filter_bind(48:49, 12)
+filter_bind(50:51, 13)
+filter_bind(52:53, 14)
+filter_bind(54:55, 15)
+filter_bind(56:57, 16)
+filter_bind(58:59, 17)
+
+# leaves a final dataset
 # introduce a hyphen for between "climate" and "change"
+# remove all numbers
 sdgs <- sdgs %>%
-  mutate(text = map(text, function(x) gsub("climate change", "climate-change", x))) %>%
-  mutate(text = map(text, function(x) gsub("\\d+", "", x)))
-
-# remove numbers
+  mutate(text = map(text, function(x) gsub("climate change", "climate-change", x)))
 
 
 ## find the word frequencies in each document ----------------
@@ -70,7 +107,7 @@ p <- sdg_tf_idf %>%
   arrange(desc(tf_idf)) %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>% 
   group_by(rowid) %>% 
-  top_n(15) %>% 
+  top_n(10) %>% 
   ungroup()
   
   print(subset(p, rowid == i) %>%
@@ -87,22 +124,46 @@ top_words <- sdg_tf_idf %>%
   arrange(desc(tf_idf)) %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>% 
   group_by(rowid) %>% 
-  top_n(10) %>% 
+  top_n(5) %>% 
   ungroup() %>%
-  arrange(rowid, tf_idf)
+  arrange(rowid, desc(tf_idf))
 
-fwrite(top_words, file = "sdg_words_output.csv")
+fwrite(top_words, file = paste0("sdg_words_output-", Sys.Date(), ".csv"))
 
+# get synonyms for top 5 words
+# top_words_synonyms <- top_words %>%
+#   mutate(synonyms = qdap::synonyms(word, report.null = FALSE) %>% unlist() %>% paste(sep = " ", collapse=" "))
+
+
+# can we predict a report that also has tf-idf ratings?
+
+sdg_goal6_test <- read_in("https://unstats.un.org/sdgs/files/report/2018/TheSustainableDevelopmentGoalsReport2018-EN.pdf") %>% rowid_to_column() %>% filter(rowid %in% 20:23)
+
+g6 <- paste(as.character(sdg_goal6_test$text), collapse = "") %>% data.frame()
+
+names(g6)[1] <- "text"
+
+g6$text <- as.character(g6$text)
+g6 <- g6 %>% rowid_to_column()
+g6 <- word_frequencies(g6, "text")
+  
+g6 <- g6 %>% 
+  group_by(rowid) %>% 
+  mutate(rank = row_number(), `term frequency` = n/total) %>%
+  select(-total) %>%
+    group_by(rowid) %>% 
+    top_n(10) %>% 
+    ungroup()
+
+# this has overlapping words with the sdg6 topic - so we could classify it as sdg6?
 
 ## summarise each document with LSA ------------------
 
 # split each sdg document into sentences 
-sdgs <- tokenize(sdgs$text)
-sdgs <- unlist(sdgs)
-sdgs <- data.frame(sdgs)
-sdgs <- sdgs %>% rowid_to_column()
+sdgs_tokens <- tokenize(sdgs$text)
+sdgs_tokens <- unlist(sdgs_tokens) %>% data.frame() %>% rowid_to_column()
 
-sdgs$sdgs <- as.character(sdgs$sdgs)
+sdgs_tokens$sdgs <- as.character(sdgs_tokens$sdgs)
 
 
 # tokenize each document into sentences

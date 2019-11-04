@@ -20,7 +20,11 @@ read_in <- function(input_file) {
     t <- readtext::readtext(input_file) %>%
       as.data.frame() %>%
       mutate(text = as.character(text)) %>%
-      select(-doc_id)
+      select(-doc_id) %>%
+      # remove numbers
+      mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
+      # remove the pdf characters
+      mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x)))
     
     return(t)
     
@@ -30,7 +34,11 @@ read_in <- function(input_file) {
     t <- pdftools::pdf_text(input_file) %>%
       as.data.frame() %>%
       mutate(text = as.character(`.`)) %>%
-      select(-`.`)
+      select(-`.`) %>%
+      # remove numbers
+      mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
+      # remove the pdf characters
+      mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x)))
     
     # note: this includes the tags of the text 
     # BUT further analysis seems to ignore these
