@@ -5,22 +5,21 @@ library(stringi)
 
 # this takes the target sentence and the sdg_vector of words as arguments
 # lowers the words from both arguments to lower case
-# splits up the input sentence by word
-# finds the location of the match of words in the target vector
-# subsets the sdg vector by the location and returns this word
+# then looks to extract the key sdg word from the input sentence across all sdg words for that sdg
+# subsets the sdg vector by the location of the first word found and returns this word
+
+# note that there could be more than one sdg keyword per sentence but this only returns the first one
+# it also assumes that there is more than one keyword per sdg for there to be a clean output 
 
 check_words <- function(token, sdg_vector) { 
   
   token <- tolower(token)
   sdg_vector <- tolower(sdg_vector)
-  token <- unlist(stringi::stri_extract_all_words(token))
+
+  words <- sapply(token, str_extract, sdg_vector)
   
-  id <- match(token, sdg_vector)
+  word <- words[!is.na(words)][1]
   
-  num <- id[!is.na(id)][1]
-  
-  return(sdg_vector[num])
-  
+  return(word)
 }
 
-# check_words("this has none of the words in", c("nothing", "can't"))
