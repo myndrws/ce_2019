@@ -23,6 +23,10 @@ library(tokenizers) #splits test into sentences - tokens
 # Please type the file path of where you have stored the R code:
 R_code <- "/Users/emmaoldfield/ce_2019"
 
+# Please type the file path of where you have stored the key words text file:
+SDG_key_words <- "/Users/emmaoldfield/ce_2019/SDG key words"
+
+
 
 if(getwd()=="/cloud/project"){
   setwd("/cloud/project/")
@@ -101,7 +105,7 @@ for(i in 1:max(reports_all$report_id)){
 #----------------------------------------------------------------------------------#
 
 # read in SDGs from td-idf output
-SDGs <- read_csv("sdg_words_output\ (1).txt")
+SDGs <- read_csv(paste0(SDG_key_words, "sdg_words_output\ (1).txt"))
 
 # clean up words
 ################################################ missing
