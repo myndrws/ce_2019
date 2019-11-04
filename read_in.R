@@ -1,9 +1,11 @@
-# function to read in either pdf or word documents
-
+#--------------------------------------------------------------------#
+# Program purpose: function to read in either pdf or word documents  #
+# Author: Amy Andrews                                                #
+# Date: OCT2019                                                      #
+#--------------------------------------------------------------------#
 # this still needs to get the word and pdf document into the same format at the end
 
 library(testthat)
-library(tidyverse)
 library(pdftools)
 library(readtext)
 
@@ -20,11 +22,7 @@ read_in <- function(input_file) {
     t <- readtext::readtext(input_file) %>%
       as.data.frame() %>%
       mutate(text = as.character(text)) %>%
-      select(-doc_id) %>%
-      # remove numbers
-      mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
-      # remove the pdf characters
-      mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x)))
+      select(-doc_id)
     
     return(t)
     
@@ -34,11 +32,7 @@ read_in <- function(input_file) {
     t <- pdftools::pdf_text(input_file) %>%
       as.data.frame() %>%
       mutate(text = as.character(`.`)) %>%
-      select(-`.`) %>%
-      # remove numbers
-      mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
-      # remove the pdf characters
-      mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x)))
+      select(-`.`)
     
     # note: this includes the tags of the text 
     # BUT further analysis seems to ignore these
@@ -48,6 +42,7 @@ read_in <- function(input_file) {
   } else {
     
     warning("Unrecognised file input: this should be a docx or pdf")
+    #stop("Unrecognised file input: this should be a docx or pdf")
     
   }
   
