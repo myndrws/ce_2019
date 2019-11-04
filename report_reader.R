@@ -41,7 +41,7 @@ if(getwd()=="/cloud/project"){
 
 # source functions ----------------------------------------------------------------
 source("read_in.R")
-
+source("functions/check_words.R")
 
 #----------------------------------------------------------------------------------#
 # Things to update in script                                                       #
@@ -69,9 +69,19 @@ colnames(files_list_archive) <-  "file_path"
 # bind list of all 3 folders together
 files_all <- rbind(files_list_partnerships, files_list_field_trips, files_list_archive)
 
+# count number of pdfs and word docs
+num_pdf <- length(grepl(".pdf", files_all$file_path)[grepl(".pdf", files_all$file_path)==TRUE]) #923
+num_word_docx <- length(grepl(".docx", files_all$file_path)[grepl(".docx", files_all$file_path)==TRUE]) #1535
+num_word_doc <- length(grepl(".doc", files_all$file_path)[grepl(".doc", files_all$file_path)==TRUE]) #1535
+
+
 # create a single dataframe with each row representing each document
 reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = "report_id") 
 
+
+
+
+filter(files_all, file_path=='')
 # .id creates a unique id for every iteration of the purrr i.e. a unique id for each report
   #rowid_to_column() %>%
   #mutate(text = gsub("\r", ".", text))
@@ -209,6 +219,12 @@ for(i in 1:17){
 
 # finds yes or no occurance not count of occurances
 report_output <- report_tokenized_all
+
+report_output  <- report_tokenized_all %>% 
+  mutate(SDG1= check_words(report_tokenized, wordsOfInterest_SDG1))
+
+
+
 
 report_output$keywordtag_SDG1 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG1, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0

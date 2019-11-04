@@ -9,20 +9,18 @@ library(readtext)
 
 read_in <- function(input_file) {
   
- # if(exists(paste0(input_file))){
-  
     testthat::expect_type(input_file, "character")
     
-    is_word <- grepl(".docx", input_file)
+    is_word <- (grepl(".docx", input_file) | grepl(".docx", input_file)) #checks for all word docs
     is_pdf <- grepl(".pdf", input_file)
     
     if (is_word == TRUE & is_pdf == FALSE) {
       
       # read in word document
-      t <- readtext::readtext(input_file) %>%
+      t <- readtext::readtext(input_file, ignore_missing_files = TRUE, docid_field = NULL) %>%
         as.data.frame() %>%
         mutate(text = as.character(text)) %>%
-        select(-doc_id) %>%
+        #select(-doc_id) %>%
         # remove numbers
         mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
         # remove the pdf characters
@@ -53,7 +51,6 @@ read_in <- function(input_file) {
     #  warning("Unrecognised file input: this should be a docx or pdf")
   
       }
- # }
   
   
 }
