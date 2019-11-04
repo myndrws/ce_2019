@@ -24,7 +24,7 @@ library(tokenizers) #splits test into sentences - tokens
 R_code <- "/Users/emmaoldfield/ce_2019"
 
 # Please type the file path of where you have stored the key words text file:
-SDG_key_words <- "/Users/emmaoldfield/ce_2019/SDG key words"
+SDG_key_words <- "/Users/emmaoldfield/ce_2019/sdg_output"
 
 
 # Please type the file path of where you have stored the documents you wish to scan:
@@ -40,7 +40,7 @@ if(getwd()=="/cloud/project"){
 
 
 # source functions ----------------------------------------------------------------
-source("read_in.R")
+source("functions/read_in.R")
 source("functions/check_words.R")
 
 #----------------------------------------------------------------------------------#
@@ -81,11 +81,9 @@ reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = 
 
 
 
-filter(files_all, file_path=='')
 # .id creates a unique id for every iteration of the purrr i.e. a unique id for each report
   #rowid_to_column() %>%
   #mutate(text = gsub("\r", ".", text))
-files_all <- head(files_all)
 
 
 #----------------------------------------------------------------------------------#
@@ -123,10 +121,7 @@ for(i in 1:max(reports_all$report_id)){
 #----------------------------------------------------------------------------------#
 
 # read in SDGs from td-idf output
-SDGs <- read_csv("sdg_output/sdg_words_output- 2019-11-02 .csv")
-
-# clean up words
-################################################ missing
+SDGs <- readxl::read_xls("sdg_output/sdg_words_manual_output-2019-11-04.xls", sheet=2)
 
 # function to create vector of words for each SDG
 create_vector_words <- function(SDG_id){
@@ -194,98 +189,30 @@ for(i in 1:17){
 #----------------------------------------------------------------------------------#
 
 
-# See count vector matrices in https://www.analyticsvidhya.com/blog/2017/06/word-embeddings-count-word2veec/
-# The corpus consists of D documents {d1,d2,d3...dD}. i.e. our reports
-
-# # Define vector of reports
-# reports <- c(report_tokenized) 
-#               # ,"word01 word04 word03",
-#               # "word10",
-#              #  "",
-#              #  "word02 word07 word08 word09",
-#              #  ...)
-
-
-
-# Use words of interest defined in section 3 to count occurance in each sentence (e.g. wordsOfInterest_SDG1)
-
-# # create function to loop through SDG key words to create 17 new columns
-# function(SDG_ID_number){
-#   name_of_new_col <- paste0("keywordtag_SDG_", i)
-#   assign(report)
-# 
-# }
-
-
 # finds yes or no occurance not count of occurances
-report_output <- report_tokenized_all
-
-report_output  <- report_tokenized_all %>% 
-  mutate(SDG1= check_words(report_tokenized, wordsOfInterest_SDG1))
-
-
-
-
-report_output$keywordtag_SDG1 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG1, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG2 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG2, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG3 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG3, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG4 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG4, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG5 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG5, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG6 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG6, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG7 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG7, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG8 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG8, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG9 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG9, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG10 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG10, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG11 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG11, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG12 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG12, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG13 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG13, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG14 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG14, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG15 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG15, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG16 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG16, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_output$keywordtag_SDG17 <- 
-  (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG17, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
+report_output <- report_tokenized_all %>%
+  rowwise() %>%
+  mutate(sdg1 = check_words(report_tokenized, wordsOfInterest_SDG1)) %>%
+  mutate(sdg2 = check_words(report_tokenized, wordsOfInterest_SDG2)) %>%
+  mutate(sdg3 = check_words(report_tokenized, wordsOfInterest_SDG3)) %>%
+  mutate(sdg4 = check_words(report_tokenized, wordsOfInterest_SDG4)) %>%
+  mutate(sdg5 = check_words(report_tokenized, wordsOfInterest_SDG5)) %>%
+  mutate(sdg6 = check_words(report_tokenized, wordsOfInterest_SDG6)) %>%
+  mutate(sdg7 = check_words(report_tokenized, wordsOfInterest_SDG7)) %>%
+  mutate(sdg8 = check_words(report_tokenized, wordsOfInterest_SDG8)) %>%
+  mutate(sdg9 = check_words(report_tokenized, wordsOfInterest_SDG9)) %>%
+  mutate(sdg10 = check_words(report_tokenized, wordsOfInterest_SDG10)) %>%
+  mutate(sdg11 = check_words(report_tokenized, wordsOfInterest_SDG11)) %>%
+  mutate(sdg12 = check_words(report_tokenized, wordsOfInterest_SDG12)) %>%
+  mutate(sdg13 = check_words(report_tokenized, wordsOfInterest_SDG13)) %>%
+  mutate(sdg14 = check_words(report_tokenized, wordsOfInterest_SDG14)) %>%
+  mutate(sdg15 = check_words(report_tokenized, wordsOfInterest_SDG15)) %>%
+  mutate(sdg16 = check_words(report_tokenized, wordsOfInterest_SDG16)) %>%
+  mutate(sdg17 = check_words(report_tokenized, wordsOfInterest_SDG17))
 
 
-# Keep dataframe of all occurances and remove 0s
-occurance_SDG <- report_tokenized_all %>% filter(keywordtag_SDG1 != 0 |
-                                   keywordtag_SDG2 != 0 |
-                                   keywordtag_SDG3 != 0|
-                                     keywordtag_SDG4 != 0|
-                                     keywordtag_SDG5 != 0|
-                                     keywordtag_SDG6 != 0|
-                                     keywordtag_SDG7 != 0|
-                                     keywordtag_SDG8 != 0|
-                                     keywordtag_SDG9 != 0|
-                                     keywordtag_SDG10 != 0|
-                                     keywordtag_SDG11 != 0|
-                                     keywordtag_SDG12 != 0|
-                                     keywordtag_SDG13 != 0|
-                                     keywordtag_SDG14 != 0|
-                                     keywordtag_SDG15 != 0|
-                                     keywordtag_SDG16 != 0|
-                                     keywordtag_SDG17 != 0)
-#####################vis above logic correct
-
-
-
-# loop through each SDG
-# loop through all reports
+# keep only rows where at least one word has been found
+occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(report_output)-3),]
 
 
 
