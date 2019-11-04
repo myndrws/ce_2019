@@ -17,10 +17,10 @@ read_in <- function(input_file) {
     if (is_word == TRUE & is_pdf == FALSE) {
       
       # read in word document
-      t <- readtext::readtext(input_file, ignore_missing_files = TRUE, docid_field = NULL) %>%
+      t <- readtext::readtext(input_file) %>%
         as.data.frame() %>%
         mutate(text = as.character(text)) %>%
-        #select(-doc_id) %>%
+        select(-doc_id) %>%
         # remove numbers
         mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
         # remove the pdf characters
