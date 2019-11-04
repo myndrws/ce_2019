@@ -4,8 +4,8 @@
 # Date: SEP2019                                                               #
 #-----------------------------------------------------------------------------#
 
-# install packages
-install.packages("tidyverse") # for general data manipulation 
+# install packages - This can also take a while to download
+install.packages("tidyverse") # for general data manipulation. - May get asked if you want to install from sources the packages need to compile (type yes)
 install.packages("tokenizers") # split reports into sentences
 install.packages("testthat") # for read_in function
 install.packages("pdftools") # for read_in function
@@ -19,14 +19,19 @@ library(tokenizers) #splits test into sentences - tokens
 
 
 # set working directory -----------------------------------------------------------
+
+# Please type the file path of where you have stored the R code:
+R_code <- "/Users/emmaoldfield/ce_2019"
+
+
 if(getwd()=="/cloud/project"){
   setwd("/cloud/project/")
 }else{
-  setwd("C:/Users/OldfieldE/OneDrive - Department for Business Energy and Industrial Strategy/Cool Earth/R code")}
+  setwd(R_code)}
 
 
 # source functions ----------------------------------------------------------------
-source("read_in.R")
+source("read_inEmma.R")
 
 
 #----------------------------------------------------------------------------------#
