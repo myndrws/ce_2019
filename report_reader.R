@@ -27,6 +27,11 @@ R_code <- "/Users/emmaoldfield/ce_2019"
 SDG_key_words <- "/Users/emmaoldfield/ce_2019/SDG key words"
 
 
+# Please type the file path of where you have stored the documents you wish to scan:
+documents_partnerships <- "/Users/emmaoldfield/Dropbox (Cool Earth)/Programmes/Partnerships"
+documents_field_trips <- "/Users/emmaoldfield/Dropbox (Cool Earth)/Programmes/Field trips"
+documents_archive <- "/Users/emmaoldfield/Dropbox (Cool Earth)/Programmes/ARCHIVE"
+
 
 if(getwd()=="/cloud/project"){
   setwd("/cloud/project/")
@@ -35,7 +40,7 @@ if(getwd()=="/cloud/project"){
 
 
 # source functions ----------------------------------------------------------------
-source("read_inEmma.R")
+source("read_in.R")
 
 
 #----------------------------------------------------------------------------------#
@@ -50,24 +55,27 @@ source("read_inEmma.R")
 # Step 1 - Bring in the report(s)                                                  #
 #----------------------------------------------------------------------------------#
 
-# # input_file 
-# input_file_pdf <- "/cloud/project/Reports/ADAS-Research-to-update-the-evidence-base-for-indicators-of-climate-related-risks-and-actions-in-England.pdf"
-# 
-# # read in the report using read_in function created
-# report <- read_in(input_file = input_file_pdf)
-
-
 # Read in a list of files names in the report folder
-files_list <- data.frame(list.files(path = paste0(getwd(), "/Reports"), full.names = TRUE))
+files_list_partnerships <- data.frame(list.files(path = documents_partnerships, full.names = TRUE, recursive = TRUE)) 
+files_list_field_trips <- data.frame(list.files(path = documents_field_trips, full.names = TRUE, recursive = TRUE))
+files_list_archive <- data.frame(list.files(path = documents_archive, full.names = TRUE, recursive = TRUE))
 
+
+# rename columns
+colnames(files_list_partnerships) <-  "file_path"
+colnames(files_list_field_trips)  <-  "file_path"
+colnames(files_list_archive) <-  "file_path"
+
+# bind list of all 3 folders together
+files_all <- rbind(files_list_partnerships, files_list_field_trips, files_list_archive)
 
 # create a single dataframe with each row representing each document
-reports_all <- purrr::map_dfr(as.character(files_list[,1]), read_in, .id = "report_id") 
+reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = "report_id") 
 
 # .id creates a unique id for every iteration of the purrr i.e. a unique id for each report
   #rowid_to_column() %>%
   #mutate(text = gsub("\r", ".", text))
-
+files_all <- head(files_all)
 
 
 #----------------------------------------------------------------------------------#
@@ -105,7 +113,7 @@ for(i in 1:max(reports_all$report_id)){
 #----------------------------------------------------------------------------------#
 
 # read in SDGs from td-idf output
-SDGs <- read_csv(paste0(SDG_key_words, "sdg_words_output\ (1).txt"))
+SDGs <- read_csv("sdg_output/sdg_words_output- 2019-11-02 .csv")
 
 # clean up words
 ################################################ missing
@@ -200,39 +208,41 @@ for(i in 1:17){
 
 
 # finds yes or no occurance not count of occurances
-report_tokenized_all$keywordtag_SDG1 <- 
+report_output <- report_tokenized_all
+
+report_output$keywordtag_SDG1 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG1, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG2 <- 
+report_output$keywordtag_SDG2 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG2, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG3 <- 
+report_output$keywordtag_SDG3 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG3, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG4 <- 
+report_output$keywordtag_SDG4 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG4, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG5 <- 
+report_output$keywordtag_SDG5 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG5, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG6 <- 
+report_output$keywordtag_SDG6 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG6, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG7 <- 
+report_output$keywordtag_SDG7 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG7, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG8 <- 
+report_output$keywordtag_SDG8 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG8, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG9 <- 
+report_output$keywordtag_SDG9 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG9, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG10 <- 
+report_output$keywordtag_SDG10 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG10, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG11 <- 
+report_output$keywordtag_SDG11 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG11, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG12 <- 
+report_output$keywordtag_SDG12 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG12, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG13 <- 
+report_output$keywordtag_SDG13 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG13, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG14 <- 
+report_output$keywordtag_SDG14 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG14, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG15 <- 
+report_output$keywordtag_SDG15 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG15, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG16 <- 
+report_output$keywordtag_SDG16 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG16, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
-report_tokenized_all$keywordtag_SDG17 <- 
+report_output$keywordtag_SDG17 <- 
   (1:nrow(report_tokenized_all) %in% c(sapply(wordsOfInterest_SDG17, grep, report_tokenized_all$report_tokenized, fixed = TRUE)))+0
 
 
