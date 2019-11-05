@@ -18,7 +18,7 @@ check_words <- function(token, sdg_vector) {
   words <- sapply(token, str_extract, sdg_vector)
   
   # remove na entries 
-  words <- words[!is.na(words)]
+  words <- ifelse(is.na(words), return(NA), words[!is.na(words)])
   
   # get a vector of all the words, collapse to create one string
   # to have them as vector only, remove 'collapse' argument
