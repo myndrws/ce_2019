@@ -183,7 +183,7 @@ excel <- occurance_SDG %>%
 
 summary_excel_sdg_hits_per_report <- excel %>%
   group_by(`Report ID`, `SDG related to`) %>%
-  summarize(`Number of SDGs in document` = n())
+  summarize(`Number of SDG words found in document` = n())
 
 summary_excel_reports_per_sdg <- excel %>%
   group_by(`SDG related to`) %>%
