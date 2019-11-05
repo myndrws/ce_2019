@@ -70,9 +70,9 @@ colnames(files_list_archive) <-  "file_path"
 files_all <- rbind(files_list_partnerships, files_list_field_trips, files_list_archive)
 
 # count number of pdfs and word docs
-num_pdf <- length(grepl(".pdf", files_all$file_path)[grepl(".pdf", files_all$file_path)==TRUE]) #923
-num_word_docx <- length(grepl(".docx", files_all$file_path)[grepl(".docx", files_all$file_path)==TRUE]) #1535
-num_word_doc <- length(grepl(".doc", files_all$file_path)[grepl(".doc", files_all$file_path)==TRUE]) #1535
+num_pdf <- length(grepl(".pdf", files_all$file_path)[grepl(".pdf", files_all$file_path)==TRUE]) #1036
+num_word_docx <- length(grepl(".docx", files_all$file_path)[grepl(".docx", files_all$file_path)==TRUE]) #1798
+num_word_doc <- length(grepl(".doc", files_all$file_path)[grepl(".doc", files_all$file_path)==TRUE]) #1577
 
 
 # create a single dataframe with each row representing each document
@@ -100,7 +100,7 @@ for(i in 1:max(reports_all$report_id)){
   
   # create data frame with sentence as each row and sentence Id
   report_analysis <- as.data.frame(report_tokenized) %>%
-    mutate(sentence_id = row_number(), report_id = i) 
+    mutate(sentence_id = row_number(), report_id = i, report_file_path = report_selected$filepath[1]) 
   
   if(exists("report_tokenized_all")){
     report_tokenized_all <- rbind(report_analysis, report_tokenized_all)
@@ -171,12 +171,10 @@ occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(rep
 #----------------------------------------------------------------------------------#
 
 excel <- occurance_SDG %>%
-  pivot_longer(4:20) %>% #SDG columns 
+  pivot_longer(5:21) %>% #SDG columns 
   filter(!is.na(value)) %>% #remove columns where no SDG has been found
-  rename("SDG_words_found" = value, "SDG_related_to" = name, "sentence"= report_tokenized ) %>% # rename columns
-  select(report_id, sentence_id, sentence, SDG_related_to, SDG_words_found)
-  #left_join(files_list_field_trips, by = ) merge on file paths
-  
+  rename("SDG_words_found" = value, "SDG_related_to" = name, "sentence"= report_tokenized )%>% # rename columns
+  select(report_id, report_file_path, sentence_id, sentence, SDG_related_to, SDG_words_found)
 
 write_csv(excel, paste0(getwd(), "results_archive.csv"))
 

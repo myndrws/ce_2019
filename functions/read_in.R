@@ -10,7 +10,7 @@ library(tidyverse)
 library(pdftools)
 library(readtext)
 
-read_in <- function(input_file) {
+read_in <- function(input_file){
 
     testthat::expect_type(input_file, "character")
     
@@ -50,7 +50,7 @@ read_in <- function(input_file) {
     
   } else {
     
-    warning("Unrecognised file input: this should be a docx or pdf")
+    #warning("Unrecognised file input: this should be a docx or pdf")
     
   }
 
