@@ -48,6 +48,7 @@ source("functions/check_words.R")
 #----------------------------------------------------------------------------------#
 
 # tidy up
+# QA
 
 
 #----------------------------------------------------------------------------------#
@@ -177,7 +178,7 @@ excel <- occurance_SDG %>%
   #left_join(files_list_field_trips, by = ) merge on file paths
   
 
-write_csv(excel, paste0(getwd(), "results.csv"))
+write_csv(excel, paste0(getwd(), "results_archive.csv"))
 
 
 

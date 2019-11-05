@@ -29,7 +29,7 @@ read_in <- function(input_file) {
       mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
       # remove the pdf characters
       mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x))) %>%
-      mutate(filepath = input_file)
+      mutate(filepath = input_file) 
     
     return(t)
     
@@ -44,7 +44,7 @@ read_in <- function(input_file) {
       mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
       # remove the pdf characters
       mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x))) %>%
-      mutate(filepath = input_file)
+      mutate(filepath = input_file) 
     
     return(t)
     
