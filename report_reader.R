@@ -4,7 +4,7 @@
 # Date: SEP2019                                                               #
 #-----------------------------------------------------------------------------#
 
-# install packages - This can also take a while to download
+# install packages - This can also take a while to download. Only needs to be run once per machine
 install.packages("tidyverse") # for general data manipulation. - May get asked if you want to install from sources the packages need to compile (type yes)
 install.packages("tokenizers") # split reports into sentences
 install.packages("testthat") # for read_in function
@@ -46,9 +46,8 @@ source("functions/check_words.R")
 #----------------------------------------------------------------------------------#
 # Things to update in script                                                       #
 #----------------------------------------------------------------------------------#
-# File path to reports
-# File path to SDGs
-# Working directory
+
+# tidy up
 
 
 #----------------------------------------------------------------------------------#
@@ -77,8 +76,6 @@ num_word_doc <- length(grepl(".doc", files_all$file_path)[grepl(".doc", files_al
 
 # create a single dataframe with each row representing each document
 reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = "report_id") 
-
-
 
 
 # .id creates a unique id for every iteration of the purrr i.e. a unique id for each report
@@ -114,7 +111,6 @@ for(i in 1:max(reports_all$report_id)){
 }
 
 
-# remove nouns?
 
 #----------------------------------------------------------------------------------#
 # Step 3 - Create target sentences/vectors                                         #
@@ -139,55 +135,6 @@ for(i in 1:17){
   }
 
 
-#----------------------------------------------------------------------------------#
-# Step 4 - Use spacyr for word2vec analysis                                        #
-#----------------------------------------------------------------------------------#
-# Sys.which("condaenv")
-# 
-# install.packages("reticulate")
-# library(reticulate)
-# use_python("/usr/bin/python")
-# use_virtualenv("~/myenv")
-# use_condaenv("myenv")
-# use_condaenv(condaenv = "r-nlp", conda = "/opt/anaconda3/bin/conda")
-# 
-# library(spacyr)
-# # download language model pre trained
-# spacy_download_langmodel("en_core_web_md")
-# 
-# # Using spacey
-# spacy_initialize(model = "en_core_web_md", python_executable = "/usr/bin/python" )
-# 
-# # create function to find cosine similarity between vectors
-# vector_similarity <- function(v1,v2){
-#   dist <- textstat_dist(v1, v2, method = "cosine")
-#   if(is.nan(dist)){
-#     dist = 1
-#   }
-#   return(1-dist)
-# }
-# 
-# 
-# # define function to get semantic match between document sentences and target sentences
-# get_semantic_match <- function(document_sentences, target_sentence){
-#   matched_target <- c()
-#   sentence_vectors <- c()
-#   
-#   #load dictionary
-#   nlp <- spacy_download_langmodel("en_core_web_md")
-# }
-# 
-# 
-# 
-# #When spacy_initialize() is executed, a background process of spaCy is attached in python space. 
-# #This can take up a significant size of memory especially when a larger language model is used. Therefore,
-# #close the session
-# spacy_finalize() 
-
-#----------------------------------------------------------------------------------#
-# Step 4 - Method 1 - Count occurances of key words                                #
-#----------------------------------------------------------------------------------#
-
 
 # finds yes or no occurance not count of occurances
 report_output <- report_tokenized_all %>%
@@ -211,132 +158,25 @@ report_output <- report_tokenized_all %>%
   mutate(sdg17 = check_words(report_tokenized, wordsOfInterest_SDG17))
 
 
+
 # keep only rows where at least one word has been found
 occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(report_output)-3),]
 
 
 
-#----------------------------------------------------------------------------------#
-# Step 4 - Method 2 - Use fasttext for word2vec analysis                           #
-#----------------------------------------------------------------------------------#
-
-#install.packages("fastTextR")
-#install.packages("fastText")
-#library(fastTextR)
-#library(fastText)
-
-# save.fasttext(con, "dbpedia")
-# #download pre trained model
-# model <- read.fasttext(con)
-# 
-# 
-# # Download Data
-# fn <- "dbpedia_csv.tar.gz"
-# 
-# if ( !file.exists(fn) ) {
-#   download.file("https://github.com/le-scientifique/torchDatasets/raw/master/dbpedia_csv.tar.gz",
-#                 fn)
-#   untar(fn)
-# }
-# 
-# #Normalize Data
-# install.packages("fastText")
-# library("fastText")
-# 
-# train <- sample(sprintf("__label__%s", readLines("dbpedia_csv/train.csv")))
-# head(train)
-# 
-# train <- normalize(train)
-# writeLines(train, con = "dbpedia.train")
-# 
-# test <- readLines("dbpedia_csv/test.csv")
-# test <- normalize(test)
-# labels <- gsub("\\D", "", substr(test, 1, 4))
-# test <- substr(test, 5, max(nchar(test)))
-# head(test)
-# head(labels)
-# 
-# # Train model
-# cntrl <- ft.control(word_vec_size = 10L, learning_rate = 0.1, max_len_ngram = 2L, 
-#                     min_count = 1L, nbuckets = 10000000L, epoch = 5L, nthreads = 20L)
-# 
-# model <- fasttext(input = "dbpedia.train", method = "supervised", control = cntrl)
-# save.fasttext(model, "dbpedia")
-
-
-# This model is downloaded from: https://fasttext.cc/docs/en/supervised-models.html 
-# and is used because of its high accuracy rating 
-
-# It is uploaded using the bottom left panel in the R studio screen under files > upload.
-# (It can take a few minutes to upload) or running the code below
-
-# con = url("https://dl.fbaipublicfiles.com/fasttext/supervised-models/dbpedia.bin", "r")
-# con = gzcon(con)
-# wv = readLines(con)
-# 
-# # This line reads in the model. The model is used to predict whether a word/vector 
-# # of words is related to a piece of text 
-# 
-# model <- fasttext(input = wv, method = "supervised", control = cntrl)
-# save.fasttext(wv, "dbpedia")
-# 
-# model <- read.fasttext(wv)
-
-# If this errors - 
-
-
-# # Different method
-# install.packages("wordVectors")
-# install.packages("devtools")
-# install_github("bmschmidt/wordVectors")
-# 
-# library(wordVectors)
-# library(devtools)
-# library(httr)
-# library(tm)
-# 
-# # Train word2vec model and explore.
-# model <- word2vec('text8')
-# model %>% closest_to("communism")
-# 
-# # Plot similar terms to 'computer' and 'internet'.
-# computers <- model[[c("computer","internet"),average=F]]
-# 
-# # model[1:3000,] here restricts to the 3000 most common words in the set.
-# computer_and_internet <- model[1:3000,] %>% cosineSimilarity(computers)
-# 
-# # Filter to the top 20 terms.
-# computer_and_internet <- computer_and_internet[
-#   rank(-computer_and_internet[,1])<20 |
-#     rank(-computer_and_internet[,2])<20,
-#   ]
-# 
-# plot(computer_and_internet,type='n')
-# text(computer_and_internet,labels=rownames(computer_and_internet))
-
-
+# keep only rows where at least one word has been found
+occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(report_output)-3),]
 
 #----------------------------------------------------------------------------------#
-# Step 4 - Use rword2vec for word2vec analysis                                     #
+# Step 5 - Output into Excel                                                       #
 #----------------------------------------------------------------------------------#
-# install.packages("devtools")
-# library(devtools)
-# install_github("mukul13/rword2vec")
-# 
-# install.packages("rword2vec")
-# install.packages("lsa")
-# library(rword2vec)
-# library(lsa)
-# 
-# 
-# # Load pre trained model
-# distance(file_name = "vec.bin",
-#          search_word = "princess",
-#          num = 10)
+
+excel <- occurance_SDG %>%
+  pivot_longer(4:20) %>% #SDG columns 
+  filter(!is.na(value)) %>% #remove columns where no SDG has been found
+  rename("SDG_words_found" = value, "SDG_related_to" = name )
+
+write_csv(excel, paste0(getwd(), "results.csv"))
 
 
-#----------------------------------------------------------------------------------#
-# Step 4 - Use rword2vec for word2vec analysis                                     #
-#----------------------------------------------------------------------------------#
-install.packages("fastrtext")
-library(fastrtext)
+
