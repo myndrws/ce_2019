@@ -14,7 +14,7 @@ read_in <- function(input_file){
 
     testthat::expect_type(input_file, "character")
     
-    is_word <- (grepl(".docx", input_file) | grepl(".docx", input_file)) #checks for all word docs
+    is_word <- (grepl(".docx", input_file) | grepl(".doc", input_file)) #checks for all word docs
     is_pdf <- grepl(".pdf", input_file)
     
   
@@ -32,6 +32,8 @@ read_in <- function(input_file){
       mutate(filepath = input_file) 
     
     return(t)
+      
+    
     
   } else if (is_pdf == TRUE & is_word == FALSE) {
     

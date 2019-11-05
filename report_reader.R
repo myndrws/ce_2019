@@ -10,13 +10,14 @@ install.packages("tokenizers") # split reports into sentences
 install.packages("testthat") # for read_in function
 install.packages("pdftools") # for read_in function
 install.packages("readtext") # for read_in function
+install.packages("openxlsx")
 
 
 # load libraries
 
 library(tidyverse) # for general data manipulation 
 library(tokenizers) #splits test into sentences - tokens
-
+library(openxlsx)
 
 # set working directory -----------------------------------------------------------
 
@@ -71,7 +72,7 @@ files_all <- rbind(files_list_partnerships, files_list_field_trips, files_list_a
 
 # count number of pdfs and word docs
 num_pdf <- length(grepl(".pdf", files_all$file_path)[grepl(".pdf", files_all$file_path)==TRUE]) #1036
-num_word_docx <- length(grepl(".docx", files_all$file_path)[grepl(".docx", files_all$file_path)==TRUE]) #1798
+num_word_docx <- length(grepl(".docx", files_all$file_path)[grepl(".docx", files_all$file_path)==TRUE]) #1799
 num_word_doc <- length(grepl(".doc", files_all$file_path)[grepl(".doc", files_all$file_path)==TRUE]) #1577
 
 
@@ -162,21 +163,66 @@ report_output <- report_tokenized_all %>%
 
 
 # keep only rows where at least one word has been found
-occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(report_output)-3),]
+occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,5:21]))==ncol(report_output)-4),]
 
 
 
 #----------------------------------------------------------------------------------#
-# Step 5 - Output into Excel                                                       #
+# Step 5 - Prepare for Excel                                                       #
 #----------------------------------------------------------------------------------#
 
 excel <- occurance_SDG %>%
   pivot_longer(5:21) %>% #SDG columns 
   filter(!is.na(value)) %>% #remove columns where no SDG has been found
-  rename("SDG_words_found" = value, "SDG_related_to" = name, "sentence"= report_tokenized )%>% # rename columns
-  select(report_id, report_file_path, sentence_id, sentence, SDG_related_to, SDG_words_found)
+  select(report_id, report_file_path, sentence_id, report_tokenized, name, value) %>%
+  arrange(report_id, sentence_id) %>%
+  rename(`SDG words found` = value, `SDG related to` = name, 
+         "Sentence"= report_tokenized, `Report ID` = report_id,
+         `Report file path` = report_file_path, `Sentence ID` = "sentence_id"
+  )  # rename columns
 
-write_csv(excel, paste0(getwd(), "results_archive.csv"))
+summary_excel_sdg_hits_per_report <- excel %>%
+  group_by(`Report ID`, `SDG related to`) %>%
+  summarize(`Number of SDGs in document` = n())
+
+summary_excel_reports_per_sdg <- excel %>%
+  group_by(`SDG related to`) %>%
+  summarize(`Number of reports per SD` = n()) %>%
+  arrange(`SDG related to`)
 
 
+#----------------------------------------------------------------------------------#
+# Step 6 - Output to Excel                                                         #
+#----------------------------------------------------------------------------------#
 
+  # create workbook
+  wb <- createWorkbook()
+  
+  # define styles to use in writeData
+  headerStyle <- createStyle(fontSize = 12, halign = "center", fontColour = "white",
+                             border = "TopBottom", borderColour = "#4F81BD", fgFill = "#00447c")
+  
+  # define name of sheet in the workbook
+  addWorksheet(wb, "Summary of reports")
+  addWorksheet(wb, "Summary of SDGs")
+  addWorksheet(wb, "Words found in reports")
+  
+  # add data to the workbook
+  writeData(wb, "Summary of reports", summary_excel_sdg_hits_per_report, headerStyle = headerStyle)
+  setColWidths(wb, "Summary of reports", cols = c(1:ncol(summary_excel_sdg_hits_per_report)), widths = "auto")
+  setRowHeights(wb, "Summary of reports", rows = 1, heights = 40)
+  addFilter(wb, "Summary of reports", rows = 1, cols = c(1:ncol(summary_excel_sdg_hits_per_report)))
+  
+  # add data to the workbook
+  writeData(wb, "Summary of SDGs", summary_excel_reports_per_sdg, headerStyle = headerStyle)
+  setColWidths(wb, "Summary of SDGs", cols = c(1:ncol(summary_excel_reports_per_sdg)), widths = "auto")
+  setRowHeights(wb, "Summary of SDGs", rows = 1, heights = 40)
+  addFilter(wb, "Summary of SDGs", rows = 1, cols = c(1:ncol(summary_excel_reports_per_sdg)))
+  
+  # add data to the workbook
+  writeData(wb, "Words found in reports", excel, headerStyle = headerStyle)
+  setColWidths(wb, "Words found in reports", cols = c(1:ncol(excel)), widths = "auto")
+  setRowHeights(wb, "Words found in reports", rows = 1, heights = 40)
+  addFilter(wb, "Words found in reports", rows = 1, cols = c(1:ncol(excel)))
+  
+  saveWorkbook(wb, paste0(getwd(), "/results_", Sys.Date(),".csv"), overwrite = TRUE)
