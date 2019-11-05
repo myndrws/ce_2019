@@ -78,6 +78,11 @@ num_word_doc <- length(grepl(".doc", files_all$file_path)[grepl(".doc", files_al
 reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = "report_id") 
 
 
+# .id creates a unique id for every iteration of the purrr i.e. a unique id for each report
+  #rowid_to_column() %>%
+  #mutate(text = gsub("\r", ".", text))
+
+
 #----------------------------------------------------------------------------------#
 # Step 2 - Split into sentences                                                    #
 #----------------------------------------------------------------------------------#
@@ -130,10 +135,6 @@ for(i in 1:17){
   }
 
 
-#----------------------------------------------------------------------------------#
-# Step 4 - Count occurances of key words                                           #
-#----------------------------------------------------------------------------------#
-
 
 # finds yes or no occurance not count of occurances
 report_output <- report_tokenized_all %>%
@@ -155,6 +156,12 @@ report_output <- report_tokenized_all %>%
   mutate(sdg15 = check_words(report_tokenized, wordsOfInterest_SDG15)) %>%
   mutate(sdg16 = check_words(report_tokenized, wordsOfInterest_SDG16)) %>%
   mutate(sdg17 = check_words(report_tokenized, wordsOfInterest_SDG17))
+
+
+
+# keep only rows where at least one word has been found
+occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(report_output)-3),]
+
 
 
 # keep only rows where at least one word has been found
