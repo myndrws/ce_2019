@@ -77,6 +77,9 @@ num_word_doc <- length(grepl(".doc", files_all$file_path)[grepl(".doc", files_al
 # create a single dataframe with each row representing each document
 reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = "report_id") 
 
+# create list of report file paths and report ids
+
+
 
 #----------------------------------------------------------------------------------#
 # Step 2 - Split into sentences                                                    #
@@ -167,7 +170,10 @@ occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(rep
 excel <- occurance_SDG %>%
   pivot_longer(4:20) %>% #SDG columns 
   filter(!is.na(value)) %>% #remove columns where no SDG has been found
-  rename("SDG_words_found" = value, "SDG_related_to" = name )
+  rename("SDG_words_found" = value, "SDG_related_to" = name, "sentence"= report_tokenized ) %>% # rename columns
+  select(report_id, sentence_id, sentence, SDG_related_to, SDG_words_found)
+  #left_join(files_list_field_trips, by = ) merge on file paths
+  
 
 write_csv(excel, paste0(getwd(), "results.csv"))
 
