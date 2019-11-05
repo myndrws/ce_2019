@@ -11,11 +11,12 @@ library(pdftools)
 library(readtext)
 
 read_in <- function(input_file) {
-  
-  testthat::expect_type(input_file, "character")
-  
-  is_word <- (grepl(".docx", input_file) | grepl(".docx", input_file)) #checks for all word docs
-  is_pdf <- grepl(".pdf", input_file)
+
+    testthat::expect_type(input_file, "character")
+    
+    is_word <- (grepl(".docx", input_file) | grepl(".docx", input_file)) #checks for all word docs
+    is_pdf <- grepl(".pdf", input_file)
+    
   
   if (is_word == TRUE & is_pdf == FALSE) {
     
@@ -52,6 +53,7 @@ read_in <- function(input_file) {
     warning("Unrecognised file input: this should be a docx or pdf")
     
   }
+
   
   
 }
