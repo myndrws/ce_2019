@@ -81,11 +81,6 @@ reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = 
 
 
 
-# .id creates a unique id for every iteration of the purrr i.e. a unique id for each report
-  #rowid_to_column() %>%
-  #mutate(text = gsub("\r", ".", text))
-
-
 #----------------------------------------------------------------------------------#
 # Step 2 - Split into sentences                                                    #
 #----------------------------------------------------------------------------------#
@@ -137,6 +132,9 @@ for(i in 1:17){
   assign(name_of_vector, create_vector_words(i)) 
   }
 
+#----------------------------------------------------------------------------------#
+# Step 4 - Find SDG words in documents                                             #
+#----------------------------------------------------------------------------------#
 
 
 # finds yes or no occurance not count of occurances
@@ -166,9 +164,6 @@ report_output <- report_tokenized_all %>%
 occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(report_output)-3),]
 
 
-
-# keep only rows where at least one word has been found
-occurance_SDG <-  report_output[!(rowSums(is.na(report_output[,4:20]))==ncol(report_output)-3),]
 
 #----------------------------------------------------------------------------------#
 # Step 5 - Output into Excel                                                       #
