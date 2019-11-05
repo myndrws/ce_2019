@@ -17,11 +17,13 @@ check_words <- function(token, sdg_vector) {
   # for the token extract every word that appears in the sdg vector
   words <- sapply(token, str_extract, sdg_vector)
   
+  # remove na entries 
+  words <- words[!is.na(words)]
+  
   # get a vector of all the words, collapse to create one string
   # to have them as vector only, remove 'collapse' argument
-  words <- paste(words, collapse = ", ")
+  allwords <- paste(words, collapse = ", ")
   
-  return(words)
+  return(allwords)
   
 }
-
