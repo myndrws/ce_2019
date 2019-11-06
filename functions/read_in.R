@@ -5,52 +5,36 @@
 #--------------------------------------------------------------------#
 
 
-library(testthat)
-library(tidyverse)
-library(pdftools)
-library(readtext)
+library(testthat) # for testing the input
+library(tidyverse) # for manipulating
+library(pdftools) # reading in pdfs
+library(textreadr) # reading in word documents
+library(tools) # getting file extension 
 
 read_in <- function(input_file) {
 
     testthat::expect_type(input_file, "character")
     
-    is_word <- (grepl(".docx", input_file) | grepl(".docx", input_file)) #checks for all word docs
-    is_pdf <- grepl(".pdf", input_file)
+    is_word <- (file_ext(input_file) == "docx" | file_ext(input_file) == "doc") #checks for all word docs
+    is_pdf <- file_ext(input_file) == "pdf"
     
   
-  if (is_word == TRUE & is_pdf == FALSE) {
+  if (is_word == TRUE | is_pdf == TRUE) {
     
-    # read in word document
-    t <- readtext::readtext(input_file) %>%
-      as.data.frame() %>%
-      mutate(text = as.character(text)) %>%
-      select(-doc_id) %>%
-      # remove numbers
-      mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
-      # remove the pdf characters
+    t <- textreadr::read_document(input_file) %>%  
+      as.data.frame() %>% 
+      mutate(text = as.character(.)) %>% 
+      select(text) %>% 
+      mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>% 
       mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x))) %>%
-      mutate(filepath = input_file)
+      mutate(filepath = input_file) %>%
+      mutate(ext = tools::file_ext(input_file))
     
-    return(t)
-    
-  } else if (is_pdf == TRUE & is_word == FALSE) {
-    
-    # read in pdf document
-    t <- pdftools::pdf_text(input_file) %>%
-      as.data.frame() %>%
-      mutate(text = as.character(`.`)) %>%
-      select(-`.`) %>%
-      # remove numbers
-      mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>%
-      # remove the pdf characters
-      mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x))) %>%
-      mutate(filepath = input_file)
     
     return(t)
     
   } else {
-    
-    warning("Unrecognised file input: this should be a docx or pdf")
+
     
   }
 
