@@ -14,10 +14,10 @@ install.packages("testthat") # for read_in function
 install.packages("pdftools") # for read_in function
 install.packages("readtext") # for read_in function
 install.packages("openxlsx") # creating nice looking excel books
-
+install.packages("data.tree")
+install.packages("plyr")
 
 # load libraries - run at beginning of every session
-
 library(tidyverse) # for general data manipulation 
 library(tokenizers) #splits test into sentences - tokens
 library(openxlsx) # creating nice looking excel books
@@ -36,7 +36,7 @@ documents_partnerships <- "/Users/emmaoldfield/Dropbox (Cool Earth)/Programmes/P
 documents_field_trips <- "/Users/emmaoldfield/Dropbox (Cool Earth)/Programmes/Field trips"
 documents_archive <- "/Users/emmaoldfield/Dropbox (Cool Earth)/Programmes/ARCHIVE"
 
-
+# Set working directory - this is where outputs will be saved
 if(getwd()=="/cloud/project"){
   setwd("/cloud/project/")
 }else{
@@ -44,15 +44,14 @@ if(getwd()=="/cloud/project"){
 
 
 # source functions ----------------------------------------------------------------
-source("functions/read_in.R")
+source("functions/read_in.R") # function to read .doc , .docx and pdf files
 source("functions/check_words.R")
 
 #----------------------------------------------------------------------------------#
 # Things to update in script                                                       #
 #----------------------------------------------------------------------------------#
 
-# tidy up
-# QA
+# Tidy up by adding functions for outputs into excel
 
 
 #----------------------------------------------------------------------------------#
@@ -227,14 +226,12 @@ summary_excel_reports_per_sdg <- excel %>%
   setRowHeights(wb, "Words found in reports", rows = 1, heights = 40)
   addFilter(wb, "Words found in reports", rows = 1, cols = c(1:ncol(excel)))
   
-  saveWorkbook(wb, paste0(getwd(), "/results_", Sys.Date(),".csv"), overwrite = TRUE)
+  saveWorkbook(wb, paste0(getwd(), "/results_", Sys.Date(),".xlsx"), overwrite = TRUE)
   
 
 #----------------------------------------------------------------------------------#
 # Additional - Plot file structure                                                 #
 #----------------------------------------------------------------------------------#
-install.packages("data.tree")
-install.packages("plyr")
 library(data.tree)
 library(plyr)
 
@@ -286,9 +283,9 @@ headerStyle2 <- createStyle(fontSize = 12, halign = "center", fontColour = "whit
 
 # define name of sheet in the workbook
 addWorksheet(wb2, "File structure all")
-addWorksheet(wb2, "Programmmes/ARCHIVE")
-addWorksheet(wb2, "Programmmes/Field Trips")
-addWorksheet(wb2, "Programmmes/Partnerships")
+addWorksheet(wb2, "Programmmes-ARCHIVE")
+addWorksheet(wb2, "Programmmes-Field Trips")
+addWorksheet(wb2, "Programmmes-Partnerships")
 
 
 # add data to the workbook
@@ -298,22 +295,22 @@ setRowHeights(wb2, "File structure all", rows = 1, heights = 40)
 addFilter(wb2, "File structure all", rows = 1, cols = c(1:ncol(plot_files)))
 
 # add data to the workbook
-writeData(wb2, "Programmmes/ARCHIVE", plot_files_archive, headerStyle = headerStyle2)
-setColWidths(wb2, "Programmmes/ARCHIVE", cols = c(1:ncol(plot_files_archive)), widths = "auto")
-setRowHeights(wb2, "Programmmes/ARCHIVE", rows = 1, heights = 40)
-addFilter(wb2, "Programmmes/ARCHIVE", rows = 1, cols = c(1:ncol(plot_files_archive)))
+writeData(wb2, "Programmmes-ARCHIVE", plot_files_archive, headerStyle = headerStyle2)
+setColWidths(wb2, "Programmmes-ARCHIVE", cols = c(1:ncol(plot_files_archive)), widths = "auto")
+setRowHeights(wb2, "Programmmes-ARCHIVE", rows = 1, heights = 40)
+addFilter(wb2, "Programmmes-ARCHIVE", rows = 1, cols = c(1:ncol(plot_files_archive)))
 
 # add data to the workbook
-writeData(wb2, "Programmmes/Field Trips", plot_files_FieldTrips, headerStyle = headerStyle2)
-setColWidths(wb2, "Programmmes/Field Trips", cols = c(1:ncol(plot_files_FieldTrips)), widths = "auto")
-setRowHeights(wb2, "Programmmes/Field Trips", rows = 1, heights = 40)
-addFilter(wb2, "Programmmes/Field Trips", rows = 1, cols = c(1:ncol(plot_files_FieldTrips)))
+writeData(wb2, "Programmmes-Field Trips", plot_files_FieldTrips, headerStyle = headerStyle2)
+setColWidths(wb2, "Programmmes-Field Trips", cols = c(1:ncol(plot_files_FieldTrips)), widths = "auto")
+setRowHeights(wb2, "Programmmes-Field Trips", rows = 1, heights = 40)
+addFilter(wb2, "Programmmes-Field Trips", rows = 1, cols = c(1:ncol(plot_files_FieldTrips)))
 
 # add data to the workbook
-writeData(wb2, "Programmmes/Partnerships", plot_files_partnerships, headerStyle = headerStyle2)
-setColWidths(wb2, "Programmmes/Partnerships", cols = c(1:ncol(plot_files_partnerships)), widths = "auto")
-setRowHeights(wb2, "Programmmes/Partnerships", rows = 1, heights = 40)
-addFilter(wb2, "Programmmes/Partnerships", rows = 1, cols = c(1:ncol(plot_files_partnerships)))
+writeData(wb2, "Programmmes-Partnerships", plot_files_partnerships, headerStyle = headerStyle2)
+setColWidths(wb2, "Programmmes-Partnerships", cols = c(1:ncol(plot_files_partnerships)), widths = "auto")
+setRowHeights(wb2, "Programmmes-Partnerships", rows = 1, heights = 40)
+addFilter(wb2, "Programmmes-Partnerships", rows = 1, cols = c(1:ncol(plot_files_partnerships)))
 
 saveWorkbook(wb2, paste0(getwd(), "/fileStructure_", Sys.Date(),".xlsx"), overwrite = TRUE)
 
