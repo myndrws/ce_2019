@@ -110,3 +110,70 @@ res$entity %>%
   table() %>%
   sort(decreasing = TRUE) %>%
   head(n = 25)
+
+
+
+
+## testing for r reader not working
+
+# test script 
+source("functions/read_in.R")
+documents_partnerships <- "/Users/amyandrews/Dropbox (Cool Earth)/Programmes/Partnerships/Collaborations/Archive/Body Shop/Body shop application April"
+
+files_list_partnerships <- data.frame(list.files(path = documents_partnerships, full.names = TRUE, recursive = TRUE)) 
+
+colnames(files_list_partnerships) <-  "file_path"
+
+filtered_files_list_partnerships <- files_list_partnerships %>%
+  mutate(ext = tools::file_ext(file_path)) %>% 
+  filter(ext == "docx")
+
+reports_all <- purrr::map_dfr(as.character(filtered_files_list_partnerships$file_path), read_in, .id = "report_id") 
+
+for (i in 1:length(filtered_files_list_partnerships$file_path)) {
+  
+  read <- read_in(as.character(filtered_files_list_partnerships$file_path[i]))
+  
+  print("success")
+  
+}
+
+
+
+read_in(as.character(filtered_files_list_partnerships$file_path[3]))
+
+# file 3 and file 8 in this list causing the issue 
+
+
+filtered_files_list_partnerships$file_path[3]
+filtered_files_list_partnerships$file_path[8]
+
+
+tests <- "/Users/amyandrews/Documents/test"
+test_files <- data.frame(list.files(path = tests, full.names = TRUE, recursive = TRUE))
+colnames(test_files) <-  "file_path"
+reports_all <- purrr::map_dfr(as.character(test_files$file_path), read_in, .id = "report_id") 
+
+read_in(as.character(test_files$file_path[5]))
+
+
+# have to replace all the square brackets with unicode, as below 
+gsub("\\[", "\\\\[", gsub("\\]", "\\\\]", "[ ]")) #make sure brackets and code are the right way around
+
+
+
+
+# read in doc files too 
+
+textreadr::read_document("/Users/amyandrews/Documents/test/testingbase.docx")
+
+docing <- textreadr::read_document("/Users/amyandrews/Documents/test/testingbase.docx") %>% 
+  textreadr::read_document("/Users/amyandrews/Documents/test/testingbase.docx") %>% 
+  as.data.frame() %>% 
+  mutate(text = as.character(.)) %>% 
+  select(text) %>% 
+  mutate(text = map(text, function(x) gsub("\\d+", "", x))) %>% 
+  mutate(text = map(text, function(x) gsub("\\n|\\b|\\r", "", x))) %>%
+  mutate(filepath = "/Users/amyandrews/Documents/test/testingbase.docx") %>%
+  mutate(ext = tools::file_ext("/Users/amyandrews/Documents/test/testingbase.docx"))
+
