@@ -78,10 +78,8 @@ num_word_docx <- length(grepl(".docx", files_all$file_path)[grepl(".docx", files
 num_word_doc <- length(grepl(".doc", files_all$file_path)[grepl(".doc", files_all$file_path)==TRUE]) #1577
 
 # create a single dataframe with each row representing each document
+# Note: Ignore pdf Errors (They are just warnings)
 reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = "report_id") 
-
-# create list of report file paths and report ids
-
 
 
 #----------------------------------------------------------------------------------#
@@ -140,7 +138,7 @@ for(i in 1:17){
 #----------------------------------------------------------------------------------#
 
 
-# finds yes or no occurance not count of occurances
+# finds yes or no occurance not count of occurances - this can take a while to run (mins)
 report_output <- report_tokenized_all %>%
   rowwise() %>%
   mutate(SDG01 = check_words(report_tokenized, wordsOfInterest_SDG1)) %>%
@@ -227,14 +225,12 @@ summary_excel_reports_per_sdg <- excel %>%
   addFilter(wb, "Words found in reports", rows = 1, cols = c(1:ncol(excel)))
   
   saveWorkbook(wb, paste0(getwd(), "/results_", Sys.Date(),".xlsx"), overwrite = TRUE)
-  
 
 #----------------------------------------------------------------------------------#
 # Additional - Plot file structure                                                 #
 #----------------------------------------------------------------------------------#
 library(data.tree)
 library(plyr)
-
 
 
 # All nodes
