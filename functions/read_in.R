@@ -7,9 +7,10 @@
 
 library(testthat) # for testing the input
 library(tidyverse) # for manipulating
-library(pdftools) # reading in pdfs
 library(textreadr) # reading in word documents
 library(tools) # getting file extension 
+
+source("all_sheets_to_df.R") # read in each excel sheet one by one
 
 read_in <- function(input_file) {
 
@@ -17,6 +18,8 @@ read_in <- function(input_file) {
     
     is_word <- (file_ext(input_file) == "docx" | file_ext(input_file) == "doc") #checks for all word docs
     is_pdf <- file_ext(input_file) == "pdf"
+    is_csv <- file_ext(file_ext(input_file) == "csv")
+    is_spreadsheet <- file_ext(input_file) == "xls" | file_ext(input_file) == "xlsx"
     
   
   if (is_word == TRUE | is_pdf == TRUE) {
@@ -33,12 +36,15 @@ read_in <- function(input_file) {
     
     return(t)
     
-  } else {
+  } else if (is_csv == TRUE) {
 
+    # is_csv
     
-  }
+  } else if (is_spreadsheet == TRUE) {
 
+  t <- all_sheets_to_df(input_file)
   
+  return(t)
   
 }
 
