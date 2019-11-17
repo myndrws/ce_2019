@@ -90,12 +90,13 @@ reports_all <- purrr::map_dfr(as.character(files_all$file_path), read_in, .id = 
 for(i in 1:max(reports_all$report_id)){
   
   # select one report at a time
-  report_selected <- reports_all %>% filter(report_id == i )
+  report_selected <- reports_all %>% filter(report_id == i) 
   
   # create one string
   report_string <- paste(report_selected[,"text"])
   
   # split into sentences
+  # spreadsheet files won't be split as they've had punctuation removed
   report_tokenized <- unlist(tokenize_sentences(report_string))
   
   # create data frame with sentence as each row and sentence Id
